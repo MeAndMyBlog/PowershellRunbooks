@@ -2,9 +2,10 @@
 # Create a report of licenses assigned to Entra ID user accounts using the Microsoft Graph PowerShell SDK cmdlets
 # Github link: https://github.com/MeAndMyBlog/PowershellRunbooks/CheckForExpiredSecretsCertificatesv5.1.ps1
 # See https:// for an article describing how to get the runbook started and how to install it
-
+#
 # V1.0  21-feb-2025  Creation of the process.
 #
+
 Function Add-MessageRecipients {
     # Function to build an addressee list to send email   
     [cmdletbinding()]
@@ -18,17 +19,15 @@ Function Add-MessageRecipients {
     }
   } 
 
-
 Connect-MgGraph -Identity -NoWelcome
+
 #Collect list of Apps to test
 $App = Get-MgApplication -All
-#$App = Get-MgApplication -Filter "AppId eq '3c8fc6d3-bd68-47fc-9f69-d1b5ad9dff6e'"
-#run for every App
-#(get-mgcontext).Scopes
 
 $PreExpirationTime = 30
-
 $ExpirationTable = @()
+
+#run for every App
 "Checking on $($App.count) Applications"
 foreach($Application in $App){
     try {
@@ -37,6 +36,7 @@ foreach($Application in $App){
     catch {
         $Owners = "Not Found"
     }
+    #We created an custom role for a credential manager; we don't provide Ownership to App Registration; you can skip this if you want.
     try {
         $Scope = "/"+ $application.Id 
         $Passwordchangers = [String]::join(',',(Get-MgRoleManagementDirectoryRoleAssignment -Filter "RoleDefinitionID eq 'c8a78d9e-9e8d-440c-a6a6-969ed335966f' and DirectoryScopeId eq '$Scope'" -ExpandProperty Principal).principal.AdditionalProperties.mail)
@@ -45,7 +45,7 @@ foreach($Application in $App){
     catch {
         $Passwordchangers = "Not Found"
     }
-    
+    #Look for secrets
     foreach($secret in $Application.PasswordCredentials){
         if($secret.EndDateTime -lt ((get-date).AddDays($PreExpirationTime))){
             #Secret is been expired
@@ -63,6 +63,7 @@ foreach($Application in $App){
 
         }
     }
+    #Look for Certificates
     foreach($Cert in $Application.KeyCredentials){
         if($cert.EndDateTime -lt ((get-date).AddDays($PreExpirationTime))){
             #certificate is expired
@@ -83,6 +84,7 @@ foreach($Application in $App){
 #Create Unique list of Password changers
 $AllPassChangers = $ExpirationTable | Select-Object PasswordChanger -Unique
 
+#construct a HTML Message to send to the owners
 $EmailHeader = @"
         <!DOCTYPE html>
         <html>
@@ -133,8 +135,8 @@ $EmailFooter = @"
         <p>
         </html>
 "@
+#Send Emails
 $MsgSubject = "Alert - Action Needed! An Azure registred App is (about to) Expire"
-
 foreach($PassChanger in $AllPassChangers){
     $PassChanger2 = "jaarts@te.com"
     if($PassChanger.PasswordChanger -ne 'Not Found'){

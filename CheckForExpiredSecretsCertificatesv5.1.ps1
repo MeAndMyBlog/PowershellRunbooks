@@ -3,6 +3,9 @@
 # Github link: https://github.com/MeAndMyBlog/PowershellRunbooks/CheckForExpiredSecretsCertificatesv5.1.ps1
 # See https:// for an article describing how to get the runbook started and how to install it
 #
+# !!!!!! This line needs to be changed to an administration that is guard of teh App Registrations
+# $PassChanger2 = "FallBackEmailaddress@domain.com"
+#
 # V1.0  21-feb-2025  Creation of the process.
 #
 
@@ -138,7 +141,7 @@ $EmailFooter = @"
 #Send Emails
 $MsgSubject = "Alert - Action Needed! An Azure registred App is (about to) Expire"
 foreach($PassChanger in $AllPassChangers){
-    $PassChanger2 = "jaarts@te.com"
+    $PassChanger2 = "FallBackEmailaddress@domain.com"
     if($PassChanger.PasswordChanger -ne 'Not Found'){
         if(($PassChanger.PasswordChanger) -contains ","){
             [array]$MsgToRecipients = Add-MessageRecipients -ListOfAddresses @($PassChanger.PasswordChanger)
@@ -149,10 +152,6 @@ foreach($PassChanger in $AllPassChangers){
         [array]$MsgToRecipients = Add-MessageRecipients -ListOfAddresses @( $PassChanger2 )
     }
     $ReportOwners = $MsgToRecipients | ConvertTo-Html -Fragment
-    
-    #[array]$MsgToRecipients = Add-MessageRecipients -ListOfAddresses @( $PassChanger2 )
-
-    
     $ReportTable = $ExpirationTable | Where-Object {$_.PasswordChanger -eq $PassChanger.PasswordChanger} 
     $HtmlMsg = $EmailHeader +$($ReportTable | ConvertTo-Html -Fragment | ForEach-Object{$_ -replace "&lt;","<" -replace "&gt;", ">" -replace "&#39;", "'"}) + $EmailFooter
     $MsgBody = @{
@@ -162,18 +161,10 @@ foreach($PassChanger in $AllPassChangers){
     $Message =  @{subject           = $MsgSubject}
     $Message += @{toRecipients      = $MsgToRecipients}  
     $Message += @{body              = $MsgBody}
-    
-    $Params   = @{'message'         = $Message}
+        $Params   = @{'message'         = $Message}
     $Params  += @{'saveToSentItems' = $True}
     $Params  += @{'isDeliveryReceiptRequested' = $false}
-    
     "Sending a message to {0}" -f $PassChanger.PasswordChanger
     Send-MgUserMail -BodyParameter $Params -UserId 'te-noreply@te.com'
-    
-    
 }
-
-
-
-
 Disconnect-MgGraph

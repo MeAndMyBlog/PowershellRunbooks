@@ -1,6 +1,6 @@
 # CheckForExpiredSecretsCertificatesv5.1.ps1
 # Create a report of licenses assigned to Entra ID user accounts using the Microsoft Graph PowerShell SDK cmdlets
-# Github link: CheckForExpiredSecretsCertificatesv5.1.ps1
+# Github link: https://github.com/MeAndMyBlog/PowershellRunbooks/CheckForExpiredSecretsCertificatesv5.1.ps1
 # See https:// for an article describing how to get the runbook started and how to install it
 
 # V1.0  21-feb-2025  Creation of the process.

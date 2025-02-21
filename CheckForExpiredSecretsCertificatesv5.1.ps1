@@ -1,3 +1,12 @@
+# CheckForExpiredSecretsCertificatesv5.1.ps1
+# Create a report of licenses assigned to Entra ID user accounts using the Microsoft Graph PowerShell SDK cmdlets
+# Github link: https://github.com/12Knocksinna/Office365itpros/blob/master/ReportUserAssignedLicenses-MgGraph.PS1
+# See https://practical365.com/create-licensing-report-microsoft365-tenant/ for an article describing how to run the report and 
+# https://practical365.com/report-user-license-costs/ for information about how to include licensing cost information
+# in the output
+
+# V1.0  21-feb-2025  Creation of the process.
+#
 Function Add-MessageRecipients {
     # Function to build an addressee list to send email   
     [cmdletbinding()]
